@@ -14,6 +14,7 @@ services:
       - .env
     depends_on:
       - mongo
+      - auth-service
 
   user-service:
     image: node:20-alpine
@@ -26,6 +27,30 @@ services:
       - .env
     depends_on:
       - mongo
+      - auth-service
+
+  auth-service:
+    build:
+      context: ../../backend/services/auth-service
+    container_name: auth-service
+    ports:
+      - "3001:3001"
+    env_file:
+      - ../../backend/services/auth-service/.env
+    depends_on:
+      - postgres-auth
+
+  postgres-auth:
+    image: postgres:15
+    container_name: postgres-auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_pg_data:/var/lib/postgresql/data
 
   mongo:
     image: mongo:6
@@ -37,3 +62,4 @@ services:
 
 volumes:
   mongo_data:
+  auth_pg_data:

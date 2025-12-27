@@ -1,0 +1,119 @@
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import { z } from "zod";
+import { createUser, findUserByEmail, findUserById } from "../repositories/userRepo";
+import { storeRefreshToken, findRefreshToken, deleteRefreshToken } from "../repositories/refreshTokenRepo";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../services/jwtService";
+
+const registerSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+});
+
+export async function register(req: Request, res: Response) {
+    const parsed = registerSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
+    }
+
+    const { email, password } = parsed.data;
+
+    const existing = await findUserByEmail(email);
+    if (existing) {
+        return res.status(409).json({ error: "Email already exists" });
+    }
+
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    const user = await createUser(email, passwordHash);
+    return res.status(201).json({ user });
+}
+
+const loginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+});
+
+export async function login(req: Request, res: Response) {
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
+    }
+
+    const { email, password } = parsed.data;
+
+    const user = await findUserByEmail(email);
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+    const ok = await bcrypt.compare(password, user.password_hash);
+    if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+
+    const accessToken = signAccessToken({ sub: user.id, email: user.email });
+    const refreshToken = signRefreshToken({ sub: user.id });
+
+    // expiresAt: נגזור מהימים ב-ENV (לנוחות, מספיק בשביל הפרויקט)
+    const ttlDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 14);
+    const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+
+    await storeRefreshToken({ userId: user.id, token: refreshToken, expiresAt });
+
+    // נשמור refresh token כ-cookie httpOnly
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false, // בפרודקשן: true מאחורי HTTPS
+        path: "/auth/refresh",
+        maxAge: ttlDays * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({ accessToken });
+}
+
+export async function refresh(req: Request, res: Response) {
+    const token = req.cookies?.refreshToken;
+    if (!token) return res.status(401).json({ error: "Missing refresh token" });
+
+    let payload: { sub: string };
+    try {
+        payload = verifyRefreshToken(token);
+    } catch {
+        return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    const inDb = await findRefreshToken(token);
+    if (!inDb) return res.status(401).json({ error: "Refresh token revoked" });
+
+    // rotation: מוחקים הישן, יוצרים חדש
+    await deleteRefreshToken(token);
+
+    const user = await findUserById(payload.sub);
+    if (!user) return res.status(401).json({ error: "User not found" });
+
+    const newAccessToken = signAccessToken({ sub: user.id, email: user.email });
+    const newRefreshToken = signRefreshToken({ sub: user.id });
+
+    const ttlDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 14);
+    const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+    await storeRefreshToken({ userId: user.id, token: newRefreshToken, expiresAt });
+
+    res.cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        path: "/auth/refresh",
+        maxAge: ttlDays * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({ accessToken: newAccessToken });
+}
+
+export async function logout(req: Request, res: Response) {
+    const token = req.cookies?.refreshToken;
+    if (token) {
+        await deleteRefreshToken(token);
+    }
+
+    res.clearCookie("refreshToken", { path: "/auth/refresh" });
+    return res.json({ ok: true });
+}
