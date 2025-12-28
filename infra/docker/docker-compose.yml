@@ -11,10 +11,21 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      - ../../backend/api-gateway/.env
     depends_on:
-      - mongo
       - auth-service
+      - user-service
+
+  auth-service:
+    build:
+      context: ../../backend/services/auth-service
+    container_name: auth-service
+    expose:
+      - "3001"
+    env_file:
+      - ../../backend/services/auth-service/.env
+    depends_on:
+      - postgres-auth
 
   user-service:
     image: node:20-alpine
@@ -24,21 +35,25 @@ services:
       - ../../backend/services/user-service:/app
     command: sh -c "npm install && npm run dev"
     env_file:
-      - .env
+      - ../../backend/services/user-service/.env
+    expose:
+      - "3002"
+    depends_on:
+      - postgres-user
+
+  task-service:
+    image: node:20-alpine
+    container_name: task-service
+    working_dir: /app
+    volumes:
+      - ../../backend/services/task-service:/app
+    command: sh -c "npm install && npm run dev"
+    env_file:
+      - ../../backend/services/task-service/.env
+    ports:
+      - "3003:3003"
     depends_on:
       - mongo
-      - auth-service
-
-  auth-service:
-    build:
-      context: ../../backend/services/auth-service
-    container_name: auth-service
-    ports:
-      - "3001:3001"
-    env_file:
-      - ../../backend/services/auth-service/.env
-    depends_on:
-      - postgres-auth
 
   postgres-auth:
     image: postgres:15
@@ -52,6 +67,18 @@ services:
     volumes:
       - auth_pg_data:/var/lib/postgresql/data
 
+  postgres-user:
+    image: postgres:15
+    container_name: postgres-user
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+
   mongo:
     image: mongo:6
     container_name: mongo
@@ -63,3 +90,4 @@ services:
 volumes:
   mongo_data:
   auth_pg_data:
+  user_db_data:

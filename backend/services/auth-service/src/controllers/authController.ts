@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createUser, findUserByEmail, findUserById } from "../repositories/userRepo";
 import { storeRefreshToken, findRefreshToken, deleteRefreshToken } from "../repositories/refreshTokenRepo";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../services/jwtService";
+import { createUserProfile } from "../services/userClient";
 
 const registerSchema = z.object({
     email: z.string().email(),
@@ -13,7 +14,7 @@ const registerSchema = z.object({
 export async function register(req: Request, res: Response) {
     const parsed = registerSchema.safeParse(req.body);
     if (!parsed.success) {
-        return res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
+        return res.status(400).json({ error: "Invalid input" });
     }
 
     const { email, password } = parsed.data;
@@ -26,9 +27,21 @@ export async function register(req: Request, res: Response) {
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    const user = await createUser(email, passwordHash);
-    return res.status(201).json({ user });
+    try {
+        const user = await createUser(email, passwordHash);
+
+        await createUserProfile({
+            id: user.id,
+            email: user.email,
+        });
+
+        return res.status(201).json({ user });
+    } catch (err) {
+        console.error("REGISTER ERROR:", err);
+        return res.status(500).json({ error: "Registration failed" });
+    }
 }
+
 
 const loginSchema = z.object({
     email: z.string().email(),
