@@ -1,10 +1,22 @@
 const taskService = require('../services/task.service');
+const publishEvent = require("../kafka/publishEvent");
 
 const createTask = async (req, res) => {
     try {
         const task = await taskService.createTask({
             ...req.body,
             userId: req.user.id
+        });
+        await publishEvent({
+            topic: "task.events",
+            eventType: "task.created",
+            payload: {
+                taskId: task.id,
+                userId: task.userId,
+                title: task.title,
+                dueDate: task.dueDate,
+            },
+            correlationId: req.requestId,
         });
         res.status(201).json(task);
     } catch (error) {

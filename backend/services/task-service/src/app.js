@@ -1,9 +1,12 @@
 const express = require('express');
 const taskRoutes = require('./routes/task.routes');
+const requestContext = require("./middlewares/requestContext");
 
 const app = express();
 
 app.use(express.json());
+
+app.use(requestContext);
 
 // 🔴 LOG CRITICAL
 app.use((req, res, next) => {
