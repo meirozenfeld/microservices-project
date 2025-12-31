@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as userService from "../services/user.service";
+import logger from "../utils/logger";
 
 /**
  * CREATE USER (internal / admin)
@@ -22,7 +23,7 @@ export async function createUser(req: Request, res: Response) {
 
         res.status(201).json(user);
     } catch (err) {
-        console.error("CREATE USER ERROR:", err);
+        logger.error({ err }, "Create user failed");
         res.status(500).json({ message: "Failed to create user" });
     }
 }
@@ -42,7 +43,7 @@ export async function getUser(req: Request, res: Response) {
 
         res.json(user);
     } catch (err) {
-        console.error("GET USER ERROR:", err);
+        logger.error({ err }, "Get user failed");
         res.status(500).json({ message: "Failed to fetch user" });
     }
 }
@@ -67,7 +68,7 @@ export async function getMe(req: Request, res: Response) {
 
         res.json(user);
     } catch (err) {
-        console.error("GET ME ERROR:", err);
+        logger.error({ err }, "GetMe user failed");
         res.status(500).json({ message: "Failed to fetch user" });
     }
 }
@@ -92,7 +93,7 @@ export async function createUserInternal(req: Request, res: Response) {
 
         res.status(201).json(user);
     } catch (err) {
-        console.error("CREATE USER INTERNAL ERROR:", err);
+        logger.error({ err }, "Create user internal failed");
         res.status(500).json({ message: "Failed to create user" });
     }
 }

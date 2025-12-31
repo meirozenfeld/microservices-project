@@ -1,13 +1,21 @@
 const { producer, connectProducer } = require("./kafkaClient");
 const { randomUUID } = require("crypto");
+const { getContext } = require("../context/requestContext.store");
+const logger = require("../utils/logger");
 
 async function publishEvent({
     topic,
     eventType,
     payload,
-    correlationId,
+    correlationId: explicitCorrelationId,
 }) {
     await connectProducer();
+
+    const context = getContext();
+    const correlationId =
+        explicitCorrelationId ||
+        context?.correlationId ||
+        randomUUID();
 
     const event = {
         eventId: randomUUID(),
@@ -28,7 +36,10 @@ async function publishEvent({
         ],
     });
 
-    console.log(`📨 Event published: ${eventType}`);
+    logger.info(
+        { eventType, correlationId },
+        "Event published to Kafka"
+    );
 }
 
 module.exports = publishEvent;

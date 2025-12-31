@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { mongoUri, mongoMaxRetries, serviceName } = require('./env');
+const logger = require("../utils/logger");
 
 let retries = 0;
 
@@ -9,16 +10,19 @@ const connectToMongo = async () => {
             autoIndex: true
         });
 
-        console.log(`🟢 [${serviceName}] MongoDB connected`);
+        logger.info("MongoDB connected");
     } catch (error) {
         retries += 1;
-        console.error(
-            `🔴 [${serviceName}] MongoDB connection failed (attempt ${retries}):`,
-            error.message
+        logger.error(
+            { err: error.message, retries },
+            "MongoDB connection failed"
         );
 
         if (retries >= mongoMaxRetries) {
-            console.error(`❌ [${serviceName}] Max Mongo retries reached. Exiting.`);
+            logger.error(
+                { err: error.message, retries },
+                "MongoDB connection failed"
+            );
             process.exit(1);
         }
 

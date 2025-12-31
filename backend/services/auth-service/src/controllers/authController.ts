@@ -5,6 +5,7 @@ import { createUser, findUserByEmail, findUserById } from "../repositories/userR
 import { storeRefreshToken, findRefreshToken, deleteRefreshToken } from "../repositories/refreshTokenRepo";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../services/jwtService";
 import { createUserProfile } from "../services/userClient";
+import logger from "../utils/logger";
 
 const registerSchema = z.object({
     email: z.string().email(),
@@ -37,7 +38,7 @@ export async function register(req: Request, res: Response) {
 
         return res.status(201).json({ user });
     } catch (err) {
-        console.error("REGISTER ERROR:", err);
+        logger.error({ err }, "Register failed");
         return res.status(500).json({ error: "Registration failed" });
     }
 }

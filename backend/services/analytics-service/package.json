@@ -1,0 +1,17 @@
+{
+    "name": "analytics-service",
+    "version": "1.0.0",
+    "description": "Analytics & metrics service",
+    "main": "src/server.js",
+    "scripts": {
+        "dev": "node src/server.js",
+        "start": "node src/server.js"
+    },
+    "dependencies": {
+        "express": "^4.19.2",
+        "ioredis": "^5.4.1",
+        "prom-client": "^15.1.0",
+        "dotenv": "^16.4.5",
+        "kafkajs": "^2.2.4"
+    }
+}

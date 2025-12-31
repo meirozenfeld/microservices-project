@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const { Kafka } = require("kafkajs");
 
 const kafka = new Kafka({
@@ -16,7 +17,7 @@ async function startAuditConsumer() {
         fromBeginning: true,
     });
 
-    console.log("👂 Audit consumer listening to task.events");
+    logger.info("Audit consumer listening to task.events");
 
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
@@ -24,19 +25,24 @@ async function startAuditConsumer() {
                 const value = message.value.toString();
                 const event = JSON.parse(value);
 
-                console.log("📥 [AUDIT EVENT]", {
-                    topic,
-                    partition,
-                    eventType: event.eventType,
-                    correlationId: event.correlationId,
-                    payload: event.payload,
-                });
+                logger.info(
+                    {
+                        eventType: event.eventType,
+                        correlationId: event.correlationId,
+                    },
+                    "Audit event received"
+                );
+
 
             } catch (err) {
-                console.error("❌ Failed to process audit event", {
-                    error: err.message,
-                    rawMessage: message.value?.toString(),
-                });
+                logger.error(
+                    {
+                        err: err.message,
+                        rawMessage: message.value?.toString(),
+                    },
+                    "Failed to process audit event"
+                );
+
             }
         },
     });

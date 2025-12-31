@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const { Kafka } = require("kafkajs");
 
 const kafka = new Kafka({
@@ -13,7 +14,7 @@ async function connectProducer() {
   if (isConnected) return;
   await producer.connect();
   isConnected = true;
-  console.log("✅ Kafka producer connected");
+  logger.info("Kafka producer connected");
 }
 
 module.exports = {

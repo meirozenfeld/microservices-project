@@ -1,12 +1,16 @@
+const logger = require("../utils/logger");
+
 const authMiddleware = (req, res, next) => {
     const userId = req.headers['x-user-id'];
 
     // Debug log
-    console.log('[TASK SERVICE AUTH] Headers:', {
-        'x-user-id': req.headers['x-user-id'],
-        'authorization': req.headers['authorization'],
-        allHeaders: Object.keys(req.headers).filter(k => k.startsWith('x-'))
-    });
+    logger.debug(
+        {
+            userId: req.headers["x-user-id"],
+            hasAuth: Boolean(req.headers["authorization"]),
+        },
+        "Auth middleware headers"
+    );
 
     if (!userId) {
         return res.status(401).json({
