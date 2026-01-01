@@ -15,26 +15,35 @@ const healthRoutes = require("./routes/health.routes");
 
 const app = express();
 
-app.use(helmet());
-app.use(cors());
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: false,
+}));
+
+// ✅ CORS אחד ויחיד, לפני הכל
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
+
+// ✅ חובה! טיפול ב־OPTIONS
+app.use((req, res, next) => {
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+    }
+    next();
+});
+
 
 app.use(requestContext);
 app.use(httpLogger);
 
-// 🟢 routes without body parsing
+// routes
 app.use(healthRoutes);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/tasks", taskRoutes);
 app.use("/analytics", analyticsRoutes);
-
-// 🟢 body parsing only AFTER proxy routes (or not at all in gateway)
-app.use(express.json());
-
-// 404
-app.use((req, res) => {
-    res.status(404).json({ ok: false, error: "Not found" });
-});
 
 const port = Number(process.env.PORT || 3000);
 app.listen(port, () => {

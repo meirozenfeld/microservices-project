@@ -36,7 +36,24 @@ export async function register(req: Request, res: Response) {
             email: user.email,
         });
 
-        return res.status(201).json({ user });
+        // Generate tokens like login
+        const accessToken = signAccessToken({ sub: user.id, email: user.email });
+        const refreshToken = signRefreshToken({ sub: user.id });
+
+        const ttlDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 14);
+        const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+        await storeRefreshToken({ userId: user.id, token: refreshToken, expiresAt });
+
+        // Set refresh token cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false,
+            path: "/",
+            maxAge: ttlDays * 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(201).json({ accessToken });
     } catch (err) {
         logger.error({ err }, "Register failed");
         return res.status(500).json({ error: "Registration failed" });
@@ -75,11 +92,12 @@ export async function login(req: Request, res: Response) {
     // נשמור refresh token כ-cookie httpOnly
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        sameSite: "lax",
-        secure: false, // בפרודקשן: true מאחורי HTTPS
-        path: "/auth/refresh",
+        sameSite: "lax",    // lax עובד ב-localhost, none דורש secure: true
+        secure: false,      // true בפרודקשן (HTTPS)
+        path: "/",          // כל הנתיבים
         maxAge: ttlDays * 24 * 60 * 60 * 1000,
     });
+
 
     return res.json({ accessToken });
 }
@@ -113,11 +131,12 @@ export async function refresh(req: Request, res: Response) {
 
     res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "lax",    // עקבי עם login
         secure: false,
-        path: "/auth/refresh",
+        path: "/",
         maxAge: ttlDays * 24 * 60 * 60 * 1000,
     });
+
 
     return res.json({ accessToken: newAccessToken });
 }
@@ -128,6 +147,6 @@ export async function logout(req: Request, res: Response) {
         await deleteRefreshToken(token);
     }
 
-    res.clearCookie("refreshToken", { path: "/auth/refresh" });
+    res.clearCookie("refreshToken", { path: "/" });
     return res.json({ ok: true });
 }

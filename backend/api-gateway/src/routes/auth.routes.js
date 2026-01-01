@@ -7,15 +7,13 @@ router.use(
     createProxyMiddleware({
         target: process.env.AUTH_SERVICE_URL,
         changeOrigin: true,
+
         onProxyReq: (proxyReq, req) => {
+            if (req.headers.cookie) {
+                proxyReq.setHeader("cookie", req.headers.cookie);
+            }
             if (req.headers.authorization) {
                 proxyReq.setHeader("authorization", req.headers.authorization);
-            }
-            if (req.requestId) {
-                proxyReq.setHeader("x-request-id", req.requestId);
-            }
-            if (req.correlationId) {
-                proxyReq.setHeader("x-correlation-id", req.correlationId);
             }
         },
     })

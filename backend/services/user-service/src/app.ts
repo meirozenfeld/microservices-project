@@ -7,7 +7,9 @@ import logger from "./utils/logger";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: false,
+}));
 app.use(express.json());
 
 app.use((req, _res, next) => {
