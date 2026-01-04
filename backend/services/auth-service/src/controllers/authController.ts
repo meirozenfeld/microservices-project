@@ -1,16 +1,47 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { z } from "zod";
-import { createUser, findUserByEmail, findUserById } from "../repositories/userRepo";
-import { storeRefreshToken, findRefreshToken, deleteRefreshToken } from "../repositories/refreshTokenRepo";
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../services/jwtService";
+
+import {
+    createUser,
+    findUserByEmail,
+    findUserById,
+} from "../repositories/userRepo";
+
+import {
+    storeRefreshToken,
+    findRefreshToken,
+    deleteRefreshToken,
+} from "../repositories/refreshTokenRepo";
+
+import {
+    signAccessToken,
+    signRefreshToken,
+    verifyRefreshToken,
+} from "../services/jwtService";
+
+// ⚠️ יישאר מיובא – נחזיר שימוש בהמשך
 import { createUserProfile } from "../services/userClient";
+
 import logger from "../utils/logger";
+
+/* ======================
+   Schemas
+====================== */
 
 const registerSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
 });
+
+const loginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+});
+
+/* ======================
+   Register
+====================== */
 
 export async function register(req: Request, res: Response) {
     const parsed = registerSchema.safeParse(req.body);
@@ -29,26 +60,45 @@ export async function register(req: Request, res: Response) {
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     try {
+        // 1️⃣ יצירת משתמש ב־auth DB
         const user = await createUser(email, passwordHash);
 
-        await createUserProfile({
-            id: user.id,
+        /**
+         * ⛔ זמנית מבוטל
+         * יצירת פרופיל ב־user-service
+         *
+         * await createUserProfile({
+         *   id: user.id,
+         *   email: user.email,
+         * });
+         */
+
+        // 2️⃣ יצירת tokens
+        const accessToken = signAccessToken({
+            sub: user.id,
             email: user.email,
         });
 
-        // Generate tokens like login
-        const accessToken = signAccessToken({ sub: user.id, email: user.email });
-        const refreshToken = signRefreshToken({ sub: user.id });
+        const refreshToken = signRefreshToken({
+            sub: user.id,
+        });
 
         const ttlDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 14);
-        const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
-        await storeRefreshToken({ userId: user.id, token: refreshToken, expiresAt });
+        const expiresAt = new Date(
+            Date.now() + ttlDays * 24 * 60 * 60 * 1000
+        );
 
-        // Set refresh token cookie
+        await storeRefreshToken({
+            userId: user.id,
+            token: refreshToken,
+            expiresAt,
+        });
+
+        // 3️⃣ cookie
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             sameSite: "lax",
-            secure: false,
+            secure: false, // true בפרודקשן
             path: "/",
             maxAge: ttlDays * 24 * 60 * 60 * 1000,
         });
@@ -60,53 +110,74 @@ export async function register(req: Request, res: Response) {
     }
 }
 
-
-const loginSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
-});
+/* ======================
+   Login
+====================== */
 
 export async function login(req: Request, res: Response) {
     const parsed = loginSchema.safeParse(req.body);
     if (!parsed.success) {
-        return res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });
+        return res.status(400).json({
+            error: "Invalid input",
+            details: parsed.error.flatten(),
+        });
     }
 
     const { email, password } = parsed.data;
 
     const user = await findUserByEmail(email);
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+    }
 
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+    if (!ok) {
+        return res.status(401).json({ error: "Invalid credentials" });
+    }
 
-    const accessToken = signAccessToken({ sub: user.id, email: user.email });
-    const refreshToken = signRefreshToken({ sub: user.id });
-
-    // expiresAt: נגזור מהימים ב-ENV (לנוחות, מספיק בשביל הפרויקט)
-    const ttlDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 14);
-    const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
-
-    await storeRefreshToken({ userId: user.id, token: refreshToken, expiresAt });
-
-    // נשמור refresh token כ-cookie httpOnly
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        sameSite: "lax",    // lax עובד ב-localhost, none דורש secure: true
-        secure: false,      // true בפרודקשן (HTTPS)
-        path: "/",          // כל הנתיבים
-        maxAge: ttlDays * 24 * 60 * 60 * 1000,
+    const accessToken = signAccessToken({
+        sub: user.id,
+        email: user.email,
     });
 
+    const refreshToken = signRefreshToken({
+        sub: user.id,
+    });
+
+    const ttlDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 14);
+    const expiresAt = new Date(
+        Date.now() + ttlDays * 24 * 60 * 60 * 1000
+    );
+
+    await storeRefreshToken({
+        userId: user.id,
+        token: refreshToken,
+        expiresAt,
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        path: "/",
+        maxAge: ttlDays * 24 * 60 * 60 * 1000,
+    });
 
     return res.json({ accessToken });
 }
 
+/* ======================
+   Refresh
+====================== */
+
 export async function refresh(req: Request, res: Response) {
     const token = req.cookies?.refreshToken;
-    if (!token) return res.status(401).json({ error: "Missing refresh token" });
+    if (!token) {
+        return res.status(401).json({ error: "Missing refresh token" });
+    }
 
     let payload: { sub: string };
+
     try {
         payload = verifyRefreshToken(token);
     } catch {
@@ -114,35 +185,56 @@ export async function refresh(req: Request, res: Response) {
     }
 
     const inDb = await findRefreshToken(token);
-    if (!inDb) return res.status(401).json({ error: "Refresh token revoked" });
+    if (!inDb) {
+        return res.status(401).json({ error: "Refresh token revoked" });
+    }
 
-    // rotation: מוחקים הישן, יוצרים חדש
+    // rotation
     await deleteRefreshToken(token);
 
     const user = await findUserById(payload.sub);
-    if (!user) return res.status(401).json({ error: "User not found" });
+    if (!user) {
+        return res.status(401).json({ error: "User not found" });
+    }
 
-    const newAccessToken = signAccessToken({ sub: user.id, email: user.email });
-    const newRefreshToken = signRefreshToken({ sub: user.id });
+    const newAccessToken = signAccessToken({
+        sub: user.id,
+        email: user.email,
+    });
+
+    const newRefreshToken = signRefreshToken({
+        sub: user.id,
+    });
 
     const ttlDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 14);
-    const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
-    await storeRefreshToken({ userId: user.id, token: newRefreshToken, expiresAt });
+    const expiresAt = new Date(
+        Date.now() + ttlDays * 24 * 60 * 60 * 1000
+    );
+
+    await storeRefreshToken({
+        userId: user.id,
+        token: newRefreshToken,
+        expiresAt,
+    });
 
     res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
-        sameSite: "lax",    // עקבי עם login
+        sameSite: "lax",
         secure: false,
         path: "/",
         maxAge: ttlDays * 24 * 60 * 60 * 1000,
     });
 
-
     return res.json({ accessToken: newAccessToken });
 }
 
+/* ======================
+   Logout
+====================== */
+
 export async function logout(req: Request, res: Response) {
     const token = req.cookies?.refreshToken;
+
     if (token) {
         await deleteRefreshToken(token);
     }

@@ -5,18 +5,18 @@ import { http } from "./http";
 ========= */
 
 export type LoginPayload = {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 };
 
 export type RegisterPayload = {
-    email: string;
-    password: string;
-    name?: string;
+  email: string;
+  password: string;
+  name?: string;
 };
 
 export type AuthResponse = {
-    accessToken: string;
+  accessToken: string;
 };
 
 /* =========
@@ -24,19 +24,19 @@ export type AuthResponse = {
 ========= */
 
 export const authApi = {
-    login(payload: LoginPayload) {
-        return http.post<AuthResponse>("/auth/login", payload);
-    },
+  login(payload: LoginPayload) {
+    return http.post<AuthResponse>("/auth/login", payload);
+  },
 
-    register(payload: RegisterPayload) {
-        return http.post<AuthResponse>("/auth/register", payload);
-    },
+  register(payload: RegisterPayload) {
+    return http.post<AuthResponse>("/auth/register", payload);
+  },
 
-    refresh() {
-        return http.post<AuthResponse>("/auth/refresh");
-    },
+  refresh() {
+    return http.post<AuthResponse>("/auth/refresh");
+  },
 
-    logout() {
-        return http.post("/auth/logout");
-    },
+  logout() {
+    return http.post("/auth/logout");
+  },
 };

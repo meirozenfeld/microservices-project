@@ -27,11 +27,13 @@ export const bootstrapAuth = createAsyncThunk(
         try {
             const response = await authApi.refresh();
             return response.data.accessToken;
-        } catch {
+        } catch (err) {
+            // אם אין refresh token או שהוא לא תקין, זה בסדר - נציג login
             return rejectWithValue(null);
         }
     }
 );
+
 
 
 const authSlice = createSlice({

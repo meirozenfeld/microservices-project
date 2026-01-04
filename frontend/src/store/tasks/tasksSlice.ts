@@ -56,6 +56,7 @@ export const markTaskDone = createAsyncThunk(
     }
 );
 
+
 export const removeTask = createAsyncThunk(
     "tasks/removeTask",
     async (taskId: string, { rejectWithValue }) => {
@@ -78,6 +79,22 @@ const tasksSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+
+            /* MARK DONE – optimistic */
+            .addCase(markTaskDone.pending, (state, action) => {
+                const task = state.items.find(t => t._id === action.meta.arg);
+                if (task) {
+                    task.status = "done";
+                }
+            })
+            .addCase(markTaskDone.rejected, (state, action) => {
+                const taskId = action.meta.arg;
+                const task = state.items.find(t => t._id === taskId);
+                if (task) {
+                    task.status = "todo";
+                }
+                state.error = action.payload as string;
+            })
 
             /* FETCH */
             .addCase(fetchTasks.pending, (state) => {

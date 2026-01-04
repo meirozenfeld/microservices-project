@@ -23,7 +23,6 @@ export default function LoginPage() {
             const res = await authApi.login({ email, password });
             dispatch(setAccessToken(res.data.accessToken));
             nav("/", { replace: true });
-
         } catch (err: any) {
             const msg =
                 err?.response?.data?.error ||

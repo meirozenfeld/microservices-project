@@ -1,17 +1,14 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../hooks/useAppDispatch";
+import { useAppDispatch, useAppSelector } from "../../hooks";
 import { addTask } from "../../store/tasks/tasksSlice";
+import CreateTaskForm from "../../components/tasks/CreateTaskForm";
 
 export default function NewTaskPage() {
-    const [title, setTitle] = useState("");
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const status = useAppSelector(state => state.tasks.status);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!title.trim()) return;
-
+    const handleCreateTask = async (title: string) => {
         const result = await dispatch(addTask(title));
 
         if (addTask.fulfilled.match(result)) {
@@ -20,17 +17,12 @@ export default function NewTaskPage() {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <div>
             <h1>New Task</h1>
-
-            <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Task title"
+            <CreateTaskForm
+                onSubmit={handleCreateTask}
+                isSubmitting={status === "loading"}
             />
-
-            <button type="submit">Create</button>
-        </form>
+        </div>
     );
 }

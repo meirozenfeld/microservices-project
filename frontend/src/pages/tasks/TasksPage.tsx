@@ -1,65 +1,57 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../hooks/useAppDispatch";
-import { useAppSelector } from "../../hooks/useAppSelector";
-import {
-    fetchTasks,
-    markTaskDone,
-    removeTask,
-} from "../../store/tasks/tasksSlice";
+import { useAppDispatch, useAppSelector } from "../../hooks";
+
+import { fetchTasks } from "../../store/tasks/tasksSlice";
+import TaskList from "../../components/tasks/TaskList";
+import LoadingState from "../../components/ui/LoadingState";
+import EmptyState from "../../components/ui/EmptyState";
 
 export default function TasksPage() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const { items, status, error } = useAppSelector((state) => state.tasks);
+    const { items, status, error } = useAppSelector(state => state.tasks);
 
     useEffect(() => {
-        dispatch(fetchTasks());
-    }, [dispatch]);
-
-    if (status === "loading") {
-        return <p>Loading tasks...</p>;
-    }
-
-    if (status === "failed") {
-        return <p style={{ color: "red" }}>{error}</p>;
-    }
+        if (status === "idle") {
+            dispatch(fetchTasks());
+        }
+    }, [dispatch, status]);
 
     return (
         <div style={{ padding: 24 }}>
-            <h1>My Tasks</h1>
-
-            {/* ✅ כפתור בדיקה ל־NewTaskPage */}
-            <button
-                onClick={() => navigate("/tasks/new")}
-                style={{ marginBottom: 16 }}
+            {/* Header */}
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 16,
+                }}
             >
-                + New Task
-            </button>
-            <ul>
-                {items.map((task) => (
-                    <li key={task._id}>
-                        <span
-                            style={{
-                                textDecoration:
-                                    task.status === "done" ? "line-through" : "none",
-                            }}
-                        >
-                            {task.title}
-                        </span>
+                <h1>My Tasks</h1>
 
-                        {task.status !== "done" && (
-                            <button onClick={() => dispatch(markTaskDone(task._id))}>
-                                Done
-                            </button>
-                        )}
+                <button onClick={() => navigate("/tasks/new")}>
+                    + New Task
+                </button>
+            </div>
 
-                        <button onClick={() => dispatch(removeTask(task._id))}>
-                            Delete
-                        </button>
-                    </li>
-                ))}
-            </ul>
+            {/* Content */}
+            {status === "loading" && (
+                <LoadingState message="Loading tasks..." />
+            )}
+
+            {status === "failed" && (
+                <p role="alert">Error: {error}</p>
+            )}
+
+            {status === "succeeded" && items.length === 0 && (
+                <EmptyState message="No tasks yet. Create your first task." />
+            )}
+
+            {status === "succeeded" && items.length > 0 && (
+                <TaskList tasks={items} />
+            )}
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAppDispatch } from "./hooks/useAppDispatch";
 import { useAppSelector } from "./hooks/useAppSelector";
 import { bootstrapAuth } from "./store/authSlice";
@@ -14,18 +14,15 @@ import { PublicRoute } from "./auth/PublicRoute";
 
 export default function App() {
   const dispatch = useAppDispatch();
-  const { accessToken, isAuthReady } = useAppSelector(
-    (state) => state.auth
+  const isAuthReady = useAppSelector(
+    (state) => (state as any).auth?.isAuthReady
   );
 
-  // 🔑 Bootstrap auth ONCE
-  const location = useLocation();
 
   useEffect(() => {
-    if (!isAuthReady) {
-      dispatch(bootstrapAuth());
-    }
-  }, [dispatch, isAuthReady]);
+    dispatch(bootstrapAuth());
+  }, [dispatch]);
+
 
 
   // ⏳ ⛔️ קריטי: לא מרנדרים Routes לפני שסיימנו bootstrap

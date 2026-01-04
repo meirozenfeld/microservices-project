@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:3000";
 
 export const http = axios.create({
     baseURL,
@@ -8,10 +8,4 @@ export const http = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
-});
-
-// 🔴 קריטי: לוודא cookies בכל בקשה
-http.interceptors.request.use((config) => {
-    config.withCredentials = true;
-    return config;
 });

@@ -19,5 +19,8 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    server: {
+      host: "127.0.0.1",
+    },
   },
 ])

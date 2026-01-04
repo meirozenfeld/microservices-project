@@ -15,37 +15,68 @@ const healthRoutes = require("./routes/health.routes");
 
 const app = express();
 
-app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginEmbedderPolicy: false,
-}));
+/* ======================
+   Security
+====================== */
+app.use(
+   helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      crossOriginEmbedderPolicy: false,
+   })
+);
 
-// ✅ CORS אחד ויחיד, לפני הכל
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-}));
+/* ======================
+   CORS
+====================== */
+app.use(
+   cors({
+      origin: "http://127.0.0.1:5173",
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+   })
+);
 
-// ✅ חובה! טיפול ב־OPTIONS
-app.use((req, res, next) => {
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-    }
-    next();
-});
-
-
+/* ======================
+   Observability
+====================== */
 app.use(requestContext);
 app.use(httpLogger);
 
-// routes
+/* ======================
+   Body parsing
+   NOTE: Do NOT parse body in gateway - proxy middleware needs raw stream
+====================== */
+
+/* ======================
+   Routes
+====================== */
 app.use(healthRoutes);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/tasks", taskRoutes);
 app.use("/analytics", analyticsRoutes);
 
+/* ======================
+   Error handler
+====================== */
+app.use((err, req, res, next) => {
+   logger.error({ err, method: req.method, url: req.url }, "[API GATEWAY] Error");
+   res.status(500).json({ error: "Internal server error" });
+});
+
+/* ======================
+   404 handler
+====================== */
+app.use((req, res) => {
+   logger.warn({ method: req.method, url: req.url }, "[API GATEWAY] 404 - Route not found");
+   res.status(404).json({ error: "Not found" });
+});
+
+/* ======================
+   Start server
+====================== */
 const port = Number(process.env.PORT || 3000);
-app.listen(port, () => {
-    logger.info({ port }, "api-gateway listening");
+app.listen(port, "0.0.0.0", () => {
+   logger.info({ port }, "api-gateway listening");
 });
