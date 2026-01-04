@@ -10,13 +10,14 @@ import EmptyState from "../../components/ui/EmptyState";
 export default function TasksPage() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const { items, status, error } = useAppSelector(state => state.tasks);
+
+    const { items, fetch } = useAppSelector(state => state.tasks);
 
     useEffect(() => {
-        if (status === "idle") {
+        if (fetch.status === "idle") {
             dispatch(fetchTasks());
         }
-    }, [dispatch, status]);
+    }, [dispatch, fetch.status]);
 
     return (
         <div style={{ padding: 24 }}>
@@ -30,26 +31,26 @@ export default function TasksPage() {
                 }}
             >
                 <h1>My Tasks</h1>
-
-                <button onClick={() => navigate("/tasks/new")}>
-                    + New Task
-                </button>
             </div>
 
             {/* Content */}
-            {status === "loading" && (
+            {fetch.status === "loading" && (
                 <LoadingState message="Loading tasks..." />
             )}
 
-            {status === "failed" && (
-                <p role="alert">Error: {error}</p>
+            {fetch.status === "failed" && (
+                <p role="alert">Error: {fetch.error}</p>
             )}
 
-            {status === "succeeded" && items.length === 0 && (
-                <EmptyState message="No tasks yet. Create your first task." />
+            {fetch.status === "succeeded" && items.length === 0 && (
+                <EmptyState
+                    message="No tasks yet. Create your first task."
+                    actionLabel="New Task"
+                    onAction={() => navigate("/tasks/new")}
+                />
             )}
 
-            {status === "succeeded" && items.length > 0 && (
+            {fetch.status === "succeeded" && items.length > 0 && (
                 <TaskList tasks={items} />
             )}
         </div>
