@@ -6,7 +6,10 @@ import CreateTaskForm from "../../components/tasks/CreateTaskForm";
 export default function NewTaskPage() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const status = useAppSelector(state => state.tasks.status);
+
+    const createStatus = useAppSelector(
+        state => state.tasks.mutations.create.status
+    );
 
     const handleCreateTask = async (title: string) => {
         const result = await dispatch(addTask(title));
@@ -21,7 +24,7 @@ export default function NewTaskPage() {
             <h1>New Task</h1>
             <CreateTaskForm
                 onSubmit={handleCreateTask}
-                isSubmitting={status === "loading"}
+                isSubmitting={createStatus === "loading"}
             />
         </div>
     );

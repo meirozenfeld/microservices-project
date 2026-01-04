@@ -43,34 +43,51 @@ export default function TaskItem({ task }: Props) {
             style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
+                justifyContent: "space-between",
+                padding: "12px 16px",
+                border: "1px solid #e5e7eb",
+                borderRadius: 8,
+                marginBottom: 8,
+                backgroundColor: "#fff",
                 opacity: task.status === "done" ? 0.6 : 1,
             }}
         >
+            {/* Title */}
             <span
                 style={{
-                    textDecoration:
-                        task.status === "done" ? "line-through" : "none",
+                    textDecoration: task.status === "done" ? "line-through" : "none",
+                    flex: 1,
                 }}
             >
                 {task.title}
             </span>
 
-            {task.status !== "done" && (
-                <button
-                    onClick={handleMarkDone}
-                    disabled={isToggling}
-                >
-                    {isToggling ? "Marking..." : "Done"}
-                </button>
-            )}
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 8 }}>
+                {task.status !== "done" && (
+                    <button
+                        onClick={handleMarkDone}
+                        disabled={isToggling}
+                        style={{
+                            opacity: isToggling ? 0.6 : 1,
+                        }}
+                    >
+                        {isToggling ? "Marking..." : "Done"}
+                    </button>
+                )}
 
-            <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-            >
-                {isDeleting ? "Deleting..." : "Delete"}
-            </button>
+                <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    style={{
+                        color: "#b91c1c",
+                        opacity: isDeleting ? 0.6 : 1,
+                    }}
+                >
+                    {isDeleting ? "Deleting..." : "Delete"}
+                </button>
+            </div>
         </li>
     );
+
 }
