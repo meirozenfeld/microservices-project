@@ -59,29 +59,24 @@ export async function register(req: Request, res: Response) {
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
+    // 1️⃣ יצירת משתמש – שלב קריטי
+    let user;
     try {
-        // 1️⃣ יצירת משתמש ב־auth DB
-        const user = await createUser(email, passwordHash);
+        user = await createUser(email, passwordHash);
+    } catch (err) {
+        logger.error({ err, email }, "User creation failed");
+        return res.status(500).json({ error: "Registration failed" });
+    }
 
-        /**
-         * ⛔ זמנית מבוטל
-         * יצירת פרופיל ב־user-service
-         *
-         * await createUserProfile({
-         *   id: user.id,
-         *   email: user.email,
-         * });
-         */
+    // 2️⃣ access token – תמיד נוצר אם המשתמש קיים
+    const accessToken = signAccessToken({
+        sub: user.id,
+        email: user.email,
+    });
 
-        // 2️⃣ יצירת tokens
-        const accessToken = signAccessToken({
-            sub: user.id,
-            email: user.email,
-        });
-
-        const refreshToken = signRefreshToken({
-            sub: user.id,
-        });
+    // 3️⃣ refresh token + cookie – best effort (לא מפיל רישום)
+    try {
+        const refreshToken = signRefreshToken({ sub: user.id });
 
         const ttlDays = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 14);
         const expiresAt = new Date(
@@ -94,7 +89,6 @@ export async function register(req: Request, res: Response) {
             expiresAt,
         });
 
-        // 3️⃣ cookie
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             sameSite: "lax",
@@ -102,12 +96,16 @@ export async function register(req: Request, res: Response) {
             path: "/",
             maxAge: ttlDays * 24 * 60 * 60 * 1000,
         });
-
-        return res.status(201).json({ accessToken });
     } catch (err) {
-        logger.error({ err }, "Register failed");
-        return res.status(500).json({ error: "Registration failed" });
+        logger.warn(
+            { err, userId: user.id, email: user.email },
+            "Refresh token creation failed – continuing without refresh token"
+        );
     }
+
+    // 4️⃣ הצלחה – תמיד אם המשתמש נוצר
+    return res.status(201).json({ accessToken });
+
 }
 
 /* ======================
