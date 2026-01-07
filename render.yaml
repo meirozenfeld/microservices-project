@@ -16,7 +16,7 @@ services:
   # --------------------
   # AUTH SERVICE (PRIVATE)
   # --------------------
-  - type: private
+  - type: web
     name: auth-service
     runtime: docker
     plan: starter
@@ -25,11 +25,13 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
+    private: true
+
 
   # --------------------
   # USER SERVICE (PRIVATE)
   # --------------------
-  - type: private
+  - type: web
     name: user-service
     runtime: docker
     plan: starter
@@ -38,11 +40,13 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
+    private: true
+
 
   # --------------------
   # TASK SERVICE (PRIVATE)
   # --------------------
-  - type: private
+  - type: web
     name: task-service
     runtime: docker
     plan: starter
@@ -51,11 +55,13 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
+    private: true
+
 
   # --------------------
   # ANALYTICS SERVICE (PRIVATE)
   # --------------------
-  - type: private
+  - type: web
     name: analytics-service
     runtime: docker
     plan: starter
@@ -64,11 +70,13 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
+    private: true
+
 
   # --------------------
   # NOTIFICATION SERVICE (PRIVATE)
   # --------------------
-  - type: private
+  - type: web
     name: notification-service
     runtime: docker
     plan: starter
@@ -77,3 +85,5 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
+    private: true
+
