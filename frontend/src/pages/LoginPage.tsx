@@ -20,6 +20,8 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
+            console.log("LOGIN CLICK", email, password);
+            console.log("BASE URL", import.meta.env.VITE_API_BASE_URL);
             const res = await authApi.login({ email, password });
             dispatch(setAccessToken(res.data.accessToken));
             nav("/", { replace: true });
