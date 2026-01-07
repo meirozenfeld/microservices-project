@@ -1,6 +1,6 @@
 const { Kafka } = require("kafkajs");
 const logger = require("../utils/logger");
-const { getKafkaSslConfig } = require("../config/kafkaSsl");
+const { getKafkaSslConfig } = require("./kafkaSsl");
 
 const kafka = new Kafka({
   clientId: process.env.KAFKA_CLIENT_ID || "task-service",

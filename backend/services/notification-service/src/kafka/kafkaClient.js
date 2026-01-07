@@ -1,5 +1,5 @@
 const { Kafka } = require("kafkajs");
-const { getKafkaSslConfig } = require("../config/kafkaSsl");
+const { getKafkaSslConfig } = require("./kafkaSsl");
 
 const kafka = new Kafka({
     clientId: "notification-service",
