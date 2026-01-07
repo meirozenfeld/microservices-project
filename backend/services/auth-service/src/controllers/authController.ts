@@ -38,6 +38,7 @@ const loginSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
 });
+const isProd = process.env.NODE_ENV === "production";
 
 /* ======================
    Register
@@ -91,8 +92,8 @@ export async function register(req: Request, res: Response) {
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
+            sameSite: isProd ? "none" : "lax",
+            secure: isProd,
             path: "/",
             maxAge: ttlDays * 24 * 60 * 60 * 1000,
         });
@@ -155,8 +156,8 @@ export async function login(req: Request, res: Response) {
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd,
         path: "/",
         maxAge: ttlDays * 24 * 60 * 60 * 1000,
     });
@@ -217,8 +218,8 @@ export async function refresh(req: Request, res: Response) {
 
     res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd,
         path: "/",
         maxAge: ttlDays * 24 * 60 * 60 * 1000,
     });
