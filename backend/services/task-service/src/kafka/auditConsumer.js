@@ -1,10 +1,6 @@
 const logger = require("../utils/logger");
-const { Kafka } = require("kafkajs");
+const { kafka } = require("./kafkaClient");
 
-const kafka = new Kafka({
-    clientId: "task-service-audit-consumer",
-    brokers: process.env.KAFKA_BROKERS.split(","),
-});
 
 const consumer = kafka.consumer({
     groupId: "task-audit-group",

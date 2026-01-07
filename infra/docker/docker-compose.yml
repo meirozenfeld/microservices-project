@@ -48,6 +48,7 @@ services:
     working_dir: /app
     volumes:
       - ../../backend/services/task-service:/app
+      - ../../backend/services/task-service/certs:/app/certs:ro
     command: sh -c "npm install && npm run dev"
     env_file:
       - ../../backend/services/task-service/.env
@@ -63,6 +64,8 @@ services:
     volumes:
       - ../../backend/services/notification-service:/app
     command: sh -c "npm install && npm run dev"
+    env_file:
+      - ../../backend/services/notification-service/.env
     ports:
       - "3005:3005"
 
@@ -78,8 +81,8 @@ services:
     ports:
       - "3006:3006"
     depends_on:
-      kafka:
-        condition: service_started
+      # kafka:
+      #   condition: service_started
       redis:
         condition: service_healthy
 
@@ -115,41 +118,41 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.1
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:7.6.1
+  #   container_name: zookeeper
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   ports:
+  #     - "2181:2181"
 
-  kafka:
-    image: confluentinc/cp-kafka:7.6.1
-    container_name: kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092" # client from host
-      - "29092:29092" # client from docker network
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.6.1
+  #   container_name: kafka
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - "9092:9092" # client from host
+  #     - "29092:29092" # client from docker network
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
-      # listeners:
-      # - 29092 for other containers (docker network)
-      # - 9092 for host machine (your Postman / local scripts)
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #     # listeners:
+  #     # - 29092 for other containers (docker network)
+  #     # - 9092 for host machine (your Postman / local scripts)
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
-      # allows auto topic creation (ok for dev)
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+  #     # allows auto topic creation (ok for dev)
+  #     KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
   redis:
     image: redis:7-alpine
