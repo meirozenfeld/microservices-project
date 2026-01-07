@@ -8,7 +8,6 @@ services:
     plan: free
     region: frankfurt
     dockerContext: ./backend/api-gateway
-    dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
     healthCheckPath: /health
@@ -22,7 +21,6 @@ services:
     plan: free
     region: frankfurt
     dockerContext: ./backend/services/auth-service
-    dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
 
@@ -35,7 +33,6 @@ services:
     plan: free
     region: frankfurt
     dockerContext: ./backend/services/user-service
-    dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
 
@@ -48,7 +45,6 @@ services:
     plan: free
     region: frankfurt
     dockerContext: ./backend/services/task-service
-    dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
 
@@ -61,7 +57,6 @@ services:
     plan: free
     region: frankfurt
     dockerContext: ./backend/services/analytics-service
-    dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
 
@@ -74,6 +69,5 @@ services:
     plan: free
     region: frankfurt
     dockerContext: ./backend/services/notification-service
-    dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
