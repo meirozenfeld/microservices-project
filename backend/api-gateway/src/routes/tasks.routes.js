@@ -3,6 +3,8 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 const logger = require("../utils/logger");
 
 const router = express.Router();
+const TASK_SERVICE_URL =
+    process.env.TASK_SERVICE_URL || "http://task-service:3003";
 
 // TEMP dev auth (עד Phase Security)
 router.use((req, res, next) => {
@@ -28,7 +30,7 @@ router.use((req, res, next) => {
 
 router.use(
     createProxyMiddleware({
-        target: "http://task-service:3003",
+        target: TASK_SERVICE_URL,
         changeOrigin: true,
         xfwd: true,
         pathRewrite: (path) => "/tasks" + path,
@@ -37,8 +39,7 @@ router.use(
                 {
                     method: req.method,
                     path: req.path,
-                    userId: req.headers["x-user-id"],
-                    requestId: req.headers["x-request-id"],
+                    target: TASK_SERVICE_URL,
                 },
                 "Proxying request to task-service"
             );
