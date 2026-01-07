@@ -35,20 +35,25 @@ const allowedOrigins = process.env.CORS_ORIGINS
 app.use(
    cors({
       origin: (origin, callback) => {
-         // allow server-to-server / curl / health checks
-         if (!origin) return callback(null, true);
+         // Allow non-browser requests (curl, health checks, server-to-server)
+         if (!origin) {
+            return callback(null, true);
+         }
 
          if (allowedOrigins.includes(origin)) {
             return callback(null, true);
          }
 
-         return callback(new Error(`CORS blocked for origin: ${origin}`));
+         // IMPORTANT:
+         // Do NOT throw error here – just disallow CORS
+         return callback(null, false);
       },
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
    })
 );
+
 
 
 /* ======================
