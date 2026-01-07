@@ -1,0 +1,22 @@
+require("dotenv").config();
+const app = require("./app");
+const startConsumer = require("./consumer");
+const { log } = require("./utils/logger");
+
+const PORT = process.env.PORT || 3000;
+
+const isProd = process.env.NODE_ENV === "production";
+const kafkaEnabled = process.env.KAFKA_ENABLED === "true";
+
+app.listen(PORT, async () => {
+    log(`Analytics service running on port ${PORT}`);
+
+    // ✅ Consumer לא רץ בתוך web service בפרוד
+    if (kafkaEnabled && !isProd) {
+        try {
+            await startConsumer();
+        } catch (err) {
+            console.error("Failed to start analytics consumer", err);
+        }
+    }
+});
