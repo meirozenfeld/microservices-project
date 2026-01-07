@@ -1,0 +1,79 @@
+services:
+  # --------------------
+  # API GATEWAY (PUBLIC)
+  # --------------------
+  - type: web
+    name: api-gateway
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerContext: ./backend/api-gateway
+    dockerfilePath: Dockerfile
+    envVars:
+      - fromGroup: prod-shared
+    healthCheckPath: /health
+
+  # --------------------
+  # AUTH SERVICE (PRIVATE)
+  # --------------------
+  - type: private
+    name: auth-service
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerContext: ./backend/services/auth-service
+    dockerfilePath: Dockerfile
+    envVars:
+      - fromGroup: prod-shared
+
+  # --------------------
+  # USER SERVICE (PRIVATE)
+  # --------------------
+  - type: private
+    name: user-service
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerContext: ./backend/services/user-service
+    dockerfilePath: Dockerfile
+    envVars:
+      - fromGroup: prod-shared
+
+  # --------------------
+  # TASK SERVICE (PRIVATE)
+  # --------------------
+  - type: private
+    name: task-service
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerContext: ./backend/services/task-service
+    dockerfilePath: Dockerfile
+    envVars:
+      - fromGroup: prod-shared
+
+  # --------------------
+  # ANALYTICS SERVICE (PRIVATE)
+  # --------------------
+  - type: private
+    name: analytics-service
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerContext: ./backend/services/analytics-service
+    dockerfilePath: Dockerfile
+    envVars:
+      - fromGroup: prod-shared
+
+  # --------------------
+  # NOTIFICATION SERVICE (PRIVATE)
+  # --------------------
+  - type: private
+    name: notification-service
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerContext: ./backend/services/notification-service
+    dockerfilePath: Dockerfile
+    envVars:
+      - fromGroup: prod-shared
