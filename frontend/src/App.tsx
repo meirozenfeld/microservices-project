@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAppDispatch } from "./hooks/useAppDispatch";
 import { useAppSelector } from "./hooks/useAppSelector";
@@ -18,17 +18,19 @@ export default function App() {
     (state) => (state as any).auth?.isAuthReady
   );
 
+  const didBootstrap = useRef(false);
 
   useEffect(() => {
+    if (didBootstrap.current) return;
+    didBootstrap.current = true;
+
     dispatch(bootstrapAuth());
   }, [dispatch]);
 
-
-
-  // ⏳ ⛔️ קריטי: לא מרנדרים Routes לפני שסיימנו bootstrap
   if (!isAuthReady) {
     return <div style={{ padding: 24 }}>Initializing app…</div>;
   }
+
 
   return (
     <Routes>
