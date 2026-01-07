@@ -5,7 +5,7 @@ services:
   - type: web
     name: api-gateway
     runtime: docker
-    plan: starter
+    plan: free
     region: frankfurt
     dockerContext: ./backend/api-gateway
     dockerfilePath: Dockerfile
@@ -19,7 +19,7 @@ services:
   - type: web
     name: auth-service
     runtime: docker
-    plan: starter
+    plan: free
     region: frankfurt
     dockerContext: ./backend/services/auth-service
     dockerfilePath: Dockerfile
@@ -32,7 +32,7 @@ services:
   - type: web
     name: user-service
     runtime: docker
-    plan: starter
+    plan: free
     region: frankfurt
     dockerContext: ./backend/services/user-service
     dockerfilePath: Dockerfile
@@ -45,7 +45,7 @@ services:
   - type: web
     name: task-service
     runtime: docker
-    plan: starter
+    plan: free
     region: frankfurt
     dockerContext: ./backend/services/task-service
     dockerfilePath: Dockerfile
@@ -58,7 +58,7 @@ services:
   - type: web
     name: analytics-service
     runtime: docker
-    plan: starter
+    plan: free
     region: frankfurt
     dockerContext: ./backend/services/analytics-service
     dockerfilePath: Dockerfile
@@ -71,7 +71,7 @@ services:
   - type: web
     name: notification-service
     runtime: docker
-    plan: starter
+    plan: free
     region: frankfurt
     dockerContext: ./backend/services/notification-service
     dockerfilePath: Dockerfile
