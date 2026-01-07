@@ -14,7 +14,7 @@ services:
     healthCheckPath: /health
 
   # --------------------
-  # AUTH SERVICE (PRIVATE)
+  # AUTH SERVICE
   # --------------------
   - type: web
     name: auth-service
@@ -25,11 +25,9 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
-    routes:
-      - type: private
 
   # --------------------
-  # USER SERVICE (PRIVATE)
+  # USER SERVICE
   # --------------------
   - type: web
     name: user-service
@@ -40,11 +38,9 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
-    routes:
-      - type: private
 
   # --------------------
-  # TASK SERVICE (PRIVATE)
+  # TASK SERVICE
   # --------------------
   - type: web
     name: task-service
@@ -55,11 +51,9 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
-    routes:
-      - type: private
 
   # --------------------
-  # ANALYTICS SERVICE (PRIVATE)
+  # ANALYTICS SERVICE
   # --------------------
   - type: web
     name: analytics-service
@@ -70,12 +64,9 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
-    routes:
-      - type: private
-
 
   # --------------------
-  # NOTIFICATION SERVICE (PRIVATE)
+  # NOTIFICATION SERVICE
   # --------------------
   - type: web
     name: notification-service
@@ -86,5 +77,3 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - fromGroup: prod-shared
-    routes:
-      - type: private
