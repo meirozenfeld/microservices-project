@@ -2,9 +2,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+ENV NODE_ENV=production
+
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production
 
 COPY . .
+
+EXPOSE 3006
 
 CMD ["npm", "run", "start"]

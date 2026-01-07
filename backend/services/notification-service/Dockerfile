@@ -2,11 +2,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install
+ENV NODE_ENV=production
+
+COPY package*.json ./
+RUN npm ci --only=production
 
 COPY src ./src
 
 EXPOSE 3005
 
-CMD ["node", "src/server.js"]
+CMD ["npm", "run", "start"]
