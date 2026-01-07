@@ -4,6 +4,10 @@ const logger = require("../utils/logger");
 
 const router = express.Router();
 
+router.options("*", (req, res) => {
+    res.sendStatus(204);
+  });
+  
 router.use(
     createProxyMiddleware({
         target: process.env.AUTH_SERVICE_URL, // e.g. http://auth-service:3001
