@@ -5,8 +5,12 @@ function markConsumerReady() {
 }
 
 function isReady() {
+    if (process.env.NODE_ENV === "production") {
+        return true;
+    }
     return consumerReady;
 }
+
 
 module.exports = {
     markConsumerReady,
