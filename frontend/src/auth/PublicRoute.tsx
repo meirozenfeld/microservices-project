@@ -7,12 +7,12 @@ export function PublicRoute({ children }: { children: JSX.Element }) {
     (state) => state.auth
   );
 
-  // מחכים ל-bootstrap
+  // Wait for the initial auth bootstrap to complete before deciding what to render
   if (!isAuthReady) {
     return <div style={{ padding: 24 }}>Initializing…</div>;
   }
 
-  // אם כבר מחובר – אין מה לחפש ב-login/register
+  // If the user is already authenticated, redirect away from public auth pages
   if (accessToken) {
     return <Navigate to="/" replace />;
   }

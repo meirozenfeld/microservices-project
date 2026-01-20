@@ -11,7 +11,7 @@ const kafkaEnabled = process.env.KAFKA_ENABLED === "true";
 app.listen(PORT, async () => {
     log(`Analytics service running on port ${PORT}`);
 
-    // ✅ Consumer לא רץ בתוך web service בפרוד
+    // In production the consumer should not run inside the web service process
     if (kafkaEnabled && !isProd) {
         try {
             await startConsumer();

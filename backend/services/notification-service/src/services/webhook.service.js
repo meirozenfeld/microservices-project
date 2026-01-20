@@ -36,7 +36,7 @@ async function sendWebhook({ url, payload, correlationId, retries = 3 }) {
                     "All webhook retries failed"
                 );
 
-                // 🔥 חובה ל־Phase 7.3
+                // At this point all retry attempts have been exhausted – surface an error to the caller
                 throw new Error("Webhook failed after max retries");
             }
         }

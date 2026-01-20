@@ -6,7 +6,7 @@ const router = express.Router();
 const TASK_SERVICE_URL =
     process.env.TASK_SERVICE_URL || "http://task-service:3003";
 
-// TEMP dev auth (עד Phase Security)
+// Temporary dev auth middleware – replace with real auth in a later security phase
 router.use((req, res, next) => {
     req.user = { id: "user-123" };
     next();

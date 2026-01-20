@@ -18,7 +18,7 @@ const {
 const MAX_RETRIES = 3;
 
 async function processEvent(event) {
-    // 🛑 Idempotency – אם כבר טופל, לא עושים כלום
+    // Idempotency guard – if this event was already processed, skip it
     if (isProcessed(event.eventId)) {
         logger.warn(
             { eventId: event.eventId },
@@ -58,14 +58,15 @@ async function processEvent(event) {
             "Event processing failed"
         );
 
-        // ❌ יותר מדי ניסיונות → DLQ
+        // Too many retries → send to DLQ and stop retrying
         if (event.retries >= MAX_RETRIES) {
             recordFailed();
             await sendToDLQ(event, err.message);
-            return; // לא זורקים שגיאה → Kafka לא ינסה שוב
+            // Do not throw here – we don't want Kafka to retry this message again
+            return;
         }
 
-        // ❗ זורקים שגיאה → Kafka יעשה retry
+        // Re-throw to let Kafka retry the message
         throw err;
     }
 }
@@ -123,7 +124,7 @@ async function startTaskEventsConsumer() {
                     "Kafka message processing crashed"
                 );
 
-                // ❗ חובה: כדי שקפקא יעשה retry
+                // Re-throw to ensure Kafka retries the message
                 throw err;
             }
         },

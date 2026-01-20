@@ -14,7 +14,7 @@ const startServer = async () => {
     app.listen(port, () => {
         logger.info({ port }, `${serviceName} running`);
 
-        // ✅ consumer לא רץ בתוך web service בפרוד
+        // In production we run the Kafka consumer as a separate worker, not inside the web process
         if (kafkaEnabled && !isProd) {
             startAuditConsumer().catch((err) =>
                 logger.error({ err }, "Audit consumer failed")

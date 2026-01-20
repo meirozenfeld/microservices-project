@@ -28,7 +28,7 @@ export const bootstrapAuth = createAsyncThunk(
             const response = await authApi.refresh();
             return response.data.accessToken;
         } catch (err) {
-            // אם אין refresh token או שהוא לא תקין, זה בסדר - נציג login
+            // If there is no valid refresh token, we simply treat the user as logged out
             return rejectWithValue(null);
         }
     }

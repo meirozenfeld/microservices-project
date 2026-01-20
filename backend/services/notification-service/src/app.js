@@ -40,11 +40,10 @@ app.get("/metrics", (req, res) => {
 });
 
 
-// ⬅️ Kafka consumer startup
+// Kafka consumer startup (only in non-production environments)
 const isProd = process.env.NODE_ENV === "production";
 const kafkaEnabled = process.env.KAFKA_ENABLED === "true";
 
-// ⬅️ Kafka consumer startup (רק אם מותר)
 if (kafkaEnabled && !isProd) {
     startTaskEventsConsumer().catch(err => {
         logger.fatal(

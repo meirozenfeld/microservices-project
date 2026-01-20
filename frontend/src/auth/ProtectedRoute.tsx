@@ -7,16 +7,16 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
         (state) => state.auth
     );
 
-    // ⏳ מחכים לסיום bootstrapAuth
+    // Wait for auth bootstrap to finish before making routing decisions
     if (!isAuthReady) {
         return <div style={{ padding: 24 }}>Checking authentication…</div>;
     }
 
-    // ❌ רק אחרי ש-auth מוכן מחליטים
+    // If the user is not authenticated, redirect to the login page
     if (!accessToken) {
         return <Navigate to="/login" replace />;
     }
 
-    // ✅ מחובר
+    // Authenticated – render the protected content
     return children;
 }

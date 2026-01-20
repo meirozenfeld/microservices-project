@@ -20,7 +20,7 @@ import {
     verifyRefreshToken,
 } from "../services/jwtService";
 
-// ⚠️ יישאר מיובא – נחזיר שימוש בהמשך
+// TODO: user profile integration may be re-enabled in a later phase
 import { createUserProfile } from "../services/userClient";
 
 import logger from "../utils/logger";
@@ -60,7 +60,7 @@ export async function register(req: Request, res: Response) {
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // 1️⃣ יצירת משתמש – שלב קריטי
+    // 1) Create user – critical step
     let user;
     try {
         user = await createUser(email, passwordHash);
@@ -69,13 +69,13 @@ export async function register(req: Request, res: Response) {
         return res.status(500).json({ error: "Registration failed" });
     }
 
-    // 2️⃣ access token – תמיד נוצר אם המשתמש קיים
+    // 2) Access token – always generated once the user exists
     const accessToken = signAccessToken({
         sub: user.id,
         email: user.email,
     });
 
-    // 3️⃣ refresh token + cookie – best effort (לא מפיל רישום)
+    // 3) Refresh token + cookie – best-effort, should not fail registration
     try {
         const refreshToken = signRefreshToken({ sub: user.id });
 
@@ -104,7 +104,7 @@ export async function register(req: Request, res: Response) {
         );
     }
 
-    // 4️⃣ הצלחה – תמיד אם המשתמש נוצר
+    // 4) Success response – reached whenever the user was created
     return res.status(201).json({ accessToken });
 
 }

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="TASKSERVICE icon">
+  <defs>
+    <linearGradient id="main" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Connections -->
+  <g stroke="url(#main)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M64 128 L128 64 L192 128"/>
+    <path d="M64 128 L128 192 L192 128"/>
+  </g>
+
+  <!-- Nodes -->
+  <g fill="#0F172A">
+    <circle cx="64" cy="128" r="12"/>
+    <circle cx="128" cy="64" r="12"/>
+    <circle cx="192" cy="128" r="12"/>
+    <circle cx="128" cy="192" r="12"/>
+  </g>
+
+  <!-- Center Task badge -->
+  <g filter="url(#shadow)">
+    <rect x="96" y="96" width="64" height="64" rx="18" fill="url(#main)"/>
+    <path d="M112 116h32v10h-11v26h-10v-26h-11z" fill="#FFFFFF"/>
+  </g>
+</svg>
