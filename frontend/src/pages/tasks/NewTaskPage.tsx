@@ -20,8 +20,14 @@ export default function NewTaskPage() {
     };
 
     return (
-        <div>
-            <h1>New Task</h1>
+        <div className="max-w-xl space-y-6">
+            <div>
+                <h1 className="text-2xl font-semibold">New Task</h1>
+                <p className="text-sm text-muted mt-1">
+                    Add a new task to your list
+                </p>
+            </div>
+
             <CreateTaskForm
                 onSubmit={handleCreateTask}
                 isSubmitting={createStatus === "loading"}

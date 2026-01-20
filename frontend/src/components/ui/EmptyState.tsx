@@ -10,13 +10,14 @@ export default function EmptyState({
     onAction,
 }: Props) {
     return (
-        <div style={{ padding: 16 }}>
-            <p style={{ marginBottom: actionLabel ? 12 : 0 }}>
-                {message}
-            </p>
+        <div className="rounded-lg border border-dashed border-slate-700 p-6 text-center">
+            <p className="text-sm text-muted mb-4">{message}</p>
 
             {actionLabel && onAction && (
-                <button onClick={onAction}>
+                <button
+                    onClick={onAction}
+                    className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primaryHover"
+                >
                     {actionLabel}
                 </button>
             )}

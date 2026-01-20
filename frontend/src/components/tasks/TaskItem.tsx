@@ -40,54 +40,35 @@ export default function TaskItem({ task }: Props) {
 
     return (
         <li
-            style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 16px",
-                border: "1px solid #e5e7eb",
-                borderRadius: 8,
-                marginBottom: 8,
-                backgroundColor: "#fff",
-                opacity: task.status === "done" ? 0.6 : 1,
-            }}
+            className={`flex items-center justify-between rounded-lg border border-slate-700 bg-surface px-4 py-3 ${task.status === "done" ? "opacity-60" : ""
+                }`}
         >
-            {/* Title */}
             <span
-                style={{
-                    textDecoration: task.status === "done" ? "line-through" : "none",
-                    flex: 1,
-                }}
+                className={`text-sm flex-1 ${task.status === "done" ? "line-through text-muted" : ""
+                    }`}
             >
                 {task.title}
             </span>
 
-            {/* Actions */}
-            <div style={{ display: "flex", gap: 8 }}>
+            <div className="flex gap-2">
                 {task.status !== "done" && (
                     <button
                         onClick={handleMarkDone}
                         disabled={isToggling}
-                        style={{
-                            opacity: isToggling ? 0.6 : 1,
-                        }}
+                        className="text-sm text-primary hover:underline disabled:opacity-50"
                     >
-                        {isToggling ? "Marking..." : "Done"}
+                        {isToggling ? "Marking…" : "Done"}
                     </button>
                 )}
 
                 <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    style={{
-                        color: "#b91c1c",
-                        opacity: isDeleting ? 0.6 : 1,
-                    }}
+                    className="text-sm text-red-400 hover:underline disabled:opacity-50"
                 >
-                    {isDeleting ? "Deleting..." : "Delete"}
+                    {isDeleting ? "Deleting…" : "Delete"}
                 </button>
             </div>
         </li>
     );
-
 }

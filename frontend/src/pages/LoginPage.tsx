@@ -20,8 +20,6 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            console.log("LOGIN CLICK", email, password);
-            console.log("BASE URL", import.meta.env.VITE_API_BASE_URL);
             const res = await authApi.login({ email, password });
             dispatch(setAccessToken(res.data.accessToken));
             nav("/", { replace: true });
@@ -37,43 +35,54 @@ export default function LoginPage() {
     }
 
     return (
-        <div style={{ padding: 24, maxWidth: 420 }}>
-            <h2>Login</h2>
+        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+            <div className="w-full max-w-md rounded-xl bg-surface p-6 shadow-lg">
+                <h1 className="text-2xl font-semibold mb-2">Welcome back</h1>
+                <p className="text-sm text-muted mb-6">
+                    Sign in to your account
+                </p>
 
-            <form onSubmit={onSubmit}>
-                <div style={{ marginTop: 12 }}>
-                    <label>Email</label>
-                    <input
-                        style={{ width: "100%" }}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        autoComplete="email"
-                    />
-                </div>
+                <form onSubmit={onSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm mb-1">Email</label>
+                        <input
+                            className="w-full rounded-md bg-background border border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            autoComplete="email"
+                        />
+                    </div>
 
-                <div style={{ marginTop: 12 }}>
-                    <label>Password</label>
-                    <input
-                        style={{ width: "100%" }}
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoComplete="current-password"
-                    />
-                </div>
+                    <div>
+                        <label className="block text-sm mb-1">Password</label>
+                        <input
+                            type="password"
+                            className="w-full rounded-md bg-background border border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            autoComplete="current-password"
+                        />
+                    </div>
 
-                {error && (
-                    <p style={{ color: "crimson", marginTop: 12 }}>{error}</p>
-                )}
+                    {error && (
+                        <p className="text-sm text-red-400">{error}</p>
+                    )}
 
-                <button disabled={loading} style={{ marginTop: 16 }}>
-                    {loading ? "..." : "Login"}
-                </button>
-            </form>
+                    <button
+                        disabled={loading}
+                        className="w-full rounded-md bg-primary py-2 text-sm font-medium text-white hover:bg-primaryHover disabled:opacity-50"
+                    >
+                        {loading ? "Signing in…" : "Login"}
+                    </button>
+                </form>
 
-            <p style={{ marginTop: 12 }}>
-                No account? <Link to="/register">Register</Link>
-            </p>
+                <p className="mt-6 text-sm text-muted text-center">
+                    No account?{" "}
+                    <Link to="/register" className="text-primary hover:underline">
+                        Register
+                    </Link>
+                </p>
+            </div>
         </div>
     );
 }

@@ -28,58 +28,65 @@ export default function App() {
   }, [dispatch]);
 
   if (!isAuthReady) {
-    return <div style={{ padding: 24 }}>Initializing app…</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background text-text">
+        <div className="text-sm text-muted">Initializing application…</div>
+      </div>
+    );
   }
 
-
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
+    <div className="min-h-screen bg-background text-text">
+      <main className="mx-auto max-w-5xl px-4 py-8">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
 
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        }
-      />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+          />
 
-      <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <RegisterPage />
-          </PublicRoute>
-        }
-      />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <RegisterPage />
+              </PublicRoute>
+            }
+          />
 
-      <Route
-        path="/tasks"
-        element={
-          <ProtectedRoute>
-            <TasksPage />
-          </ProtectedRoute>
-        }
-      />
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <TasksPage />
+              </ProtectedRoute>
+            }
+          />
 
-      <Route
-        path="/tasks/new"
-        element={
-          <ProtectedRoute>
-            <NewTaskPage />
-          </ProtectedRoute>
-        }
-      />
+          <Route
+            path="/tasks/new"
+            element={
+              <ProtectedRoute>
+                <NewTaskPage />
+              </ProtectedRoute>
+            }
+          />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
   );
 }

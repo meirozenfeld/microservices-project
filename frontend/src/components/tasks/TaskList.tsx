@@ -7,14 +7,8 @@ type Props = {
 
 export default function TaskList({ tasks }: Props) {
     return (
-        <ul
-            style={{
-                listStyle: "none",
-                padding: 0,
-                margin: 0,
-            }}
-        >
-            {tasks.map(task => (
+        <ul className="space-y-2">
+            {tasks.map((task) => (
                 <TaskItem key={task._id} task={task} />
             ))}
         </ul>
